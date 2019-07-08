@@ -14,10 +14,13 @@ class Card:
     def __init__(self, rank=0, suit=0):
         self.rank = rank
         self.suit = suit
+        self.red_chipped = False
         
     def __str__(self):
-        return '%s of %ss'% (Card.rank_names[self.rank],
-                             Card.suit_names[self.suit])
+        if self.red_chipped:
+            return '%s of %ss (Red)'% (Card.rank_names[self.rank], Card.suit_names[self.suit])
+        else:
+            return '%s of %ss'% (Card.rank_names[self.rank], Card.suit_names[self.suit])
     
     # check if two objects are the same with ==
     def __eq__(self, other):
@@ -25,6 +28,9 @@ class Card:
     
     # is same suit (2 cards)
     def suited(self, other):
+        """
+            Returns true if the two cards are the same suit, false otherwise.
+        """
         return self.suit == other.suit
 
 class Deck:
@@ -60,22 +66,33 @@ class Deck:
         self.cards.remove(card)
 
     def pop_card(self, i=-1):
-        """Removes and returns card from the deck
-        i: index of the card to pop; by default, pops the last card.
+        """ Removes and returns card from the deck (or hand)
+        Parameters:
+            - i: index of the card to pop; by default, pops the last card.
         """
         return self.cards.pop(i)
 
     def move_cards(self, hand, num):
         """Moves the given number of cards from the deck into the Hand.
-
-        hand: destination Hand object
-        num: integer number of cards to move
+        Parameters:
+            hand: destination Hand object
+            num: integer number of cards to move
         """
         for i in range(num):
             hand.add_card(self.pop_card())
 
-    def sort(self):
-        """Sorts cards in ascending order"""
+    def draw(self, n_draws=1):
+        """ Take n draws without replacement from the top of the deck. 
+        Returns:
+            draws (list): card(s) drawn from the deck
+        """
+        if n_draws == 1:
+            return self.pop_card(0)
+        else:
+           return [self.pop_card(i) for i in range(n_draws)]
+
+    def sort_cards(self):
+        """Sorts cards by suit then rank"""
         sorted_hand = []
         for suit in Card.suit_names:
             suited_cards = []
@@ -102,10 +119,15 @@ class Hand(Deck):
         - label: (string) name for the player or some identification of whose hand it is
     """
 
-    def __init__(self, label=''):
+    def __init__(self, player_name=''):
         self.cards = []
-        self.label = label
+        self.label = player_name
 
+    """
+    def __str__(self):
+        card_string = [card.__str__() for card in self.cards]
+        return player_name + card_string
+    """
 if __name__ == '__main__':
     deck = Deck()
     hand = Hand("player one")
@@ -113,6 +135,6 @@ if __name__ == '__main__':
     deck.move_cards(hand, 5)
     print(hand)
     print()
-    hand.sort()
+    hand.sort_cards()
     print(hand) 
 

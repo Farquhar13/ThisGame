@@ -182,7 +182,7 @@ class Game():
         # check player score to see if they can "flip" game
         if player.score == 3 or player.score == 5:
             while True:
-                choice = input("Enter 1 to add a card. Enter 2 to flip the game.")
+                choice = input("Enter 1 to reveal a card. Enter 2 to flip the game.")
                 if choice == 1:
                     game.blue_add_card()
                     break
@@ -202,54 +202,43 @@ class Game():
 
     def play_white(self):
         """ A player has choosen to play the white chip to replace a card on the board with a new draw from the deck. """
-        card_id = self.enter_board_card_id("white")
-        new_card = self.deck.draw()
-        self.board[card_id] = new_card
-
-    def play_black(self):
-        """ A player has choosen to play the black chip to remove a card on the board. """
-        good_id = False
-        while good_id == False:
-            card_id = self.enter_board_card_id("black")
-            if self.board[card_id].red_chipped is True:
-                print("A red chip has already been played on that card.")
-            else:
-                good_id = True
-        self.board.pop(card_id)
-    
-    def enter_board_card_id(self, chip_color):
-        """ Gets from the user the index of the card on the board that the player wants to play a chip on. """ 
         valid_ids = [i for i in range(len(self.board))] 
         while True:
-            card_id = input("Enter the number of the card you want to play the {} chip on: ".format(chip_color))
+            replace_card_id = input("Enter the number of the card you want to replace: ")
             try:
-                card_id = int(card_id) - 1
+                replace_card_id = int(replace_card_id) - 1
             except ValueError:
                 print("Enter the NUMBER associated with the card on the left of the colon.")
                 continue
 
-            if card_id not in valid_ids:
+            if replace_card_id in valid_ids:
+                new_card = self.deck.draw()
+                self.board[replace_card_id] = new_card
+                break
+            else:
+                print("Invalid card id")
+
+    def play_black(self):
+        valid_ids = [i for i in range(len(self.board))] 
+        while True:
+            remove_card_id = input("Enter the number of the card you want to remove: ")
+            try:
+                remove_card_id = int(remove_card_id) - 1
+            except ValueError:
+                print("Enter the NUMBER associated with the card on the left of the colon.")
+                continue
+
+           if replace_card_id not in valid_ids:
                 print("Invalid card id")
                 continue
+ 
+            # Can't play the black chip and the red chip on the same card
+            if self.board[remove_card_id].red_chipped is True:
+                print("Can't play the black chip and the red chip on the same card")
             else:
                 break
 
-        return card_id 
-
-    def play_red(self):
-        """ A player has choosen to play the black chip to remove a card on the board. """
-        good_id = False
-        while good_id == False:
-            card_id = self.enter_board_card_id("red")
-            if self.board[card_id].red_chipped == True:
-                print("A red chip has already been played on that card.")
-            else:
-                good_id = True
-        self.board[card_id].red_chipped = True
-
-    def play_green(self):
-        # This is the tough one
-        pass
+        self.board.pop(remove_card_id)
 
     def chip_playing_round(self, turn_order):
         """ Loop through players. Each player plays a chip. """
@@ -264,19 +253,13 @@ class Game():
                 color = input()
                 if color in player.chips:
                     print(player_name  + " will play the " + color + " chip.")
-                    self.print_board()
                     if color == "Blue":
                         game.play_blue(player)
                     if color == "White":
                         game.play_white()
                     if color == "Black":
                         game.play_black()
-                    if color == "Red":
-                        game.play_red()
-                    if color == "Green":
-                        game.play_green()
                     break
-        self.print_board()
 
     def flop(self):
         """ Draws three cards from the deck and adds them to the board. """
